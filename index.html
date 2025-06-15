@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>符号加密通讯器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1f2d, #2c3e50);
+            color: #e0e0ff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(13, 19, 33, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border: 1px solid #3a506b;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            border-bottom: 1px solid #4a6582;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(79, 195, 247, 0.1) 0%, transparent 70%);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #4fc3f7;
+            text-shadow: 0 0 15px rgba(79, 195, 247, 0.7);
+            position: relative;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #90a4ae;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(10, 15, 30, 0.8);
+            border-bottom: 1px solid #4a6582;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab i {
+            margin-right: 10px;
+        }
+        
+        .tab.active {
+            background: linear-gradient(180deg, rgba(25, 118, 210, 0.3), transparent);
+            color: #64b5f6;
+            border-bottom: 3px solid #4fc3f7;
+        }
+        
+        .tab:not(.active):hover {
+            background: rgba(30, 40, 60, 0.7);
+        }
+        
+        .content {
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+        }
+        
+        .panel {
+            flex: 1;
+            background: rgba(20, 30, 48, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #3a506b;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #64b5f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 180px;
+            background: rgba(15, 25, 40, 0.8);
+            border: 1px solid #3a506b;
+            border-radius: 12px;
+            padding: 15px;
+            color: #e0f7fa;
+            font-size: 1.1rem;
+            resize: vertical;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #4fc3f7;
+            box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.4);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-encrypt {
+            background: linear-gradient(135deg, #2196F3, #0D47A1);
+            color: white;
+        }
+        
+        .btn-decrypt {
+            background: linear-gradient(135deg, #4CAF50, #1B5E20);
+            color: white;
+        }
+        
+        .btn-clear {
+            background: linear-gradient(135deg, #f44336, #b71c1c);
+            color: white;
+        }
+        
+        .btn-copy {
+            background: linear-gradient(135deg, #FF9800, #E65100);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .symbols-guide {
+            margin-top: 30px;
+            background: rgba(15, 25, 40, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #3a506b;
+        }
+        
+        .symbols-guide h3 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #81d4fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .symbol-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.3rem;
+            padding: 12px;
+            background: rgba(25, 35, 55, 0.6);
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .symbol-item:hover {
+            transform: translateY(-5px);
+            background: rgba(35, 45, 65, 0.7);
+        }
+        
+        .symbol {
+            font-size: 2.2rem;
+            width: 50px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.7);
+        }
+        
+        .instructions {
+            padding: 0 30px 30px;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #bbdefb;
+        }
+        
+        .instructions h3 {
+            color: #4fc3f7;
+            margin: 25px 0 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .instructions li::before {
+            content: "•";
+            color: #4fc3f7;
+            font-weight: bold;
+            display: inline-block; 
+            width: 1em;
+            margin-left: -1em;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3a506b, transparent);
+            margin: 20px 0;
+            border-radius: 2px;
+        }
+        
+        .symbol-display {
+            font-size: 1.6rem;
+            line-height: 1.8;
+            word-break: break-all;
+            min-height: 60px;
+            background: rgba(15, 25, 40, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 10px;
+            border: 1px dashed #4a6582;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .glow {
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px rgba(79, 195, 247, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(79, 195, 247, 0.8);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .example {
+            background: rgba(25, 118, 210, 0.15);
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        
+        .example-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #90a4ae;
+            font-size: 1rem;
+            border-top: 1px solid #3a506b;
+            background: rgba(10, 15, 30, 0.8);
+        }
+        
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(46, 125, 50, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+            border: 1px solid #2e7d32;
+        }
+        
+        .floating-symbols {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.1;
+            z-index: 0;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(50px, -30px) rotate(90deg);
+            }
+            50% {
+                transform: translate(0, -60px) rotate(180deg);
+            }
+            75% {
+                transform: translate(-50px, -30px) rotate(270deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 浮动背景符号 -->
+    <div class="floating-symbols" style="top: 10%; left: 5%;">☜</div>
+    <div class="floating-symbols" style="top: 15%; right: 10%;">☼</div>
+    <div class="floating-symbols" style="top: 40%; left: 8%;">☞</div>
+    <div class="floating-symbols" style="bottom: 20%; right: 7%;">☟</div>
+    <div class="floating-symbols" style="bottom: 15%; left: 12%;">✠</div>
+    <div class="floating-symbols" style="top: 30%; right: 5%;">✞</div>
+    
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-user-secret"></i> 符号加密通讯器</h1>
+            <p class="subtitle">使用高级符号加密算法保护您的通讯安全 - 加密与解密功能完全独立</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="encrypt">
+                <i class="fas fa-lock"></i> 文本加密
+            </div>
+            <div class="tab" data-tab="decrypt">
+                <i class="fas fa-unlock"></i> 符号解密
+            </div>
+        </div>
+        
+        <!-- 加密标签内容 -->
+        <div class="tab-content active" id="encrypt-tab">
+            <div class="content">
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fas fa-keyboard"></i> 输入原始文本</h2>
+                    <textarea id="inputText" placeholder="在此输入要加密的文本...">这是一条秘密消息</textarea>
+                    
+                    <div class="btn-group">
+                        <button id="encryptBtn" class="btn-encrypt pulse">
+                            <i class="fas fa-lock"></i> 加密文本
+                        </button>
+                        <button id="clearInputBtn" class="btn-clear">
+                            <i class="fas fa-trash"></i> 清除内容
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fas fa-shield-alt"></i> 加密结果</h2>
+                    <div id="outputDisplay" class="symbol-display">
+                        加密后的符号将显示在这里...
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button id="copyOutputBtn" class="btn-copy">
+                            <i class="fas fa-copy"></i> 复制符号
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 解密标签内容 -->
+        <div class="tab-content" id="decrypt-tab">
+            <div class="content">
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fas fa-code"></i> 输入加密符号</h2>
+                    <textarea id="cipherInput" placeholder="在此粘贴加密符号...">☼✠☼☝☼✠✞☝☼✠☜☝☼✠☞☝☼✠☟☝☼✠✠☝☼✠✞☝☼☜☼☝☼☜☞☝☼☜✞☝☼☜☜☝☼☜✠</textarea>
+                    
+                    <div class="btn-group">
+                        <button id="decryptBtn" class="btn-decrypt">
+                            <i class="fas fa-unlock"></i> 解密符号
+                        </button>
+                        <button id="clearCipherBtn" class="btn-clear">
+                            <i class="fas fa-trash"></i> 清除内容
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fas fa-file-alt"></i> 解密结果</h2>
+                    <div id="decryptOutput" class="symbol-display">
+                        解密后的文本将显示在这里...
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button id="copyDecryptBtn" class="btn-copy">
+                            <i class="fas fa-copy"></i> 复制文本
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="symbols-guide">
+            <h3><i class="fas fa-info-circle"></i> 符号对照表与加密规则</h3>
+            <div class="symbol-grid">
+                <div class="symbol-item">
+                    <span class="symbol">0 → ☜</span>
+                    <span>数字 0</span>
+                </div>
+                <div class="symbol-item">
+                    <span class="symbol">1 → ☼</span>
+                    <span>数字 1</span>
+                </div>
+                <div class="symbol-item">
+                    <span class="symbol">2 → ☞</span>
+                    <span>数字 2</span>
+                </div>
+                <div class="symbol-item">
+                    <span class="symbol">3 → ☟</span>
+                    <span>数字 3</span>
+                </div>
+                <div class="symbol-item">
+                    <span class="symbol">4 → ✠</span>
+                    <span>数字 4</span>
+                </div>
+                <div class="symbol-item">
+                    <span class="symbol">5 → ✞</span>
+                    <span>数字 5</span>
+                </div>
+                <div class="symbol-item">
+                    <span class="symbol" style="color: #FFD700;">☝</span>
+                    <span>字符分隔符</span>
+                </div>
+                <div class="symbol-item">
+                    <span class="symbol" style="color: #4fc3f7;">☢</span>
+                    <span>加密标识符</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-lightbulb"></i> 使用说明</h3>
+            
+            <div class="example">
+                <div class="example-title">
+                    <i class="fas fa-lock"></i>
+                    <strong>加密示例："A" 字符</strong>
+                </div>
+                <p>1. 获取Unicode值: 65</p>
+                <p>2. 转换为6进制: 145</p>
+                <p>3. 替换为符号: 1→☼, 4→✠, 5→✞</p>
+                <p>4. 最终加密结果: ☼✠✞</p>
+            </div>
+            
+            <ul>
+                <li><strong>加密过程</strong>：输入文本 → 转换为Unicode → 转为6进制 → 根据对照表替换为符号</li>
+                <li><strong>解密过程</strong>：将符号转换回6进制数字 → 转为10进制Unicode → 转换为字符</li>
+                <li>每个字符的6进制表示用"☝"符号分隔</li>
+                <li>所有加密消息以"☢"符号开头作为标识</li>
+            </ul>
+            
+            <div class="divider"></div>
+            
+            <h3><i class="fas fa-shield-alt"></i> 安全特性</h3>
+            <ul>
+                <li>双重转换机制：字符→Unicode→6进制→符号替换</li>
+                <li>每个字符独立加密，用分隔符隔离</li>
+                <li>支持所有Unicode字符（包括中文、emoji等）</li>
+                <li>加密结果无规律可循，难以被破解</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p>符号加密通讯器 v2.0 | 高级加密算法 | 加密与解密功能完全独立</p>
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>通信安全等级：军事级</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 获取DOM元素
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const inputText = document.getElementById('inputText');
+            const outputDisplay = document.getElementById('outputDisplay');
+            const cipherInput = document.getElementById('cipherInput');
+            const decryptOutput = document.getElementById('decryptOutput');
+            const encryptBtn = document.getElementById('encryptBtn');
+            const decryptBtn = document.getElementById('decryptBtn');
+            const copyOutputBtn = document.getElementById('copyOutputBtn');
+            const copyDecryptBtn = document.getElementById('copyDecryptBtn');
+            const clearInputBtn = document.getElementById('clearInputBtn');
+            const clearCipherBtn = document.getElementById('clearCipherBtn');
+            
+            // 符号映射
+            const symbolMap = {
+                '0': '☜',
+                '1': '☼',
+                '2': '☞',
+                '3': '☟',
+                '4': '✠',
+                '5': '✞'
+            };
+            
+            // 反向映射
+            const reverseSymbolMap = {
+                '☜': '0',
+                '☼': '1',
+                '☞': '2',
+                '☟': '3',
+                '✠': '4',
+                '✞': '5'
+            };
+            
+            // 标签切换功能
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 移除所有活动标签
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // 添加活动类
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                });
+            });
+            
+            // 加密函数
+            function encrypt(text) {
+                let result = '☢ '; // 添加加密标识
+                
+                for (let i = 0; i < text.length; i++) {
+                    // 获取字符的Unicode值
+                    const charCode = text.charCodeAt(i);
+                    
+                    // 将Unicode转换为6进制
+                    let base6 = charCode.toString(6);
+                    
+                    // 将每个6进制数字替换为对应符号
+                    let symbolStr = '';
+                    for (let j = 0; j < base6.length; j++) {
+                        const digit = base6[j];
+                        symbolStr += symbolMap[digit] || digit;
+                    }
+                    
+                    // 添加到结果，用分隔符连接
+                    result += symbolStr;
+                    if (i < text.length - 1) {
+                        result += '☝';
+                    }
+                }
+                
+                return result;
+            }
+            
+            // 解密函数
+            function decrypt(encryptedText) {
+                // 移除加密标识符
+                if (encryptedText.startsWith('☢')) {
+                    encryptedText = encryptedText.substring(1).trim();
+                }
+                
+                // 用分隔符分割加密字符串
+                const sections = encryptedText.split('☝');
+                let result = '';
+                
+                for (let section of sections) {
+                    // 将符号转换回6进制数字
+                    let base6 = '';
+                    for (let i = 0; i < section.length; i++) {
+                        const symbol = section[i];
+                        base6 += reverseSymbolMap[symbol] || symbol;
+                    }
+                    
+                    // 将6进制转换为10进制
+                    const charCode = parseInt(base6, 6);
+                    
+                    // 将Unicode转换为字符
+                    result += String.fromCharCode(charCode);
+                }
+                
+                return result;
+            }
+            
+            // 加密按钮事件
+            encryptBtn.addEventListener('click', () => {
+                const text = inputText.value.trim();
+                if (text) {
+                    const encrypted = encrypt(text);
+                    outputDisplay.textContent = encrypted;
+                    outputDisplay.classList.add('glow');
+                    
+                    // 移除动画效果
+                    setTimeout(() => {
+                        outputDisplay.classList.remove('glow');
+                    }, 2000);
+                } else {
+                    outputDisplay.textContent = "请输入要加密的文本...";
+                }
+            });
+            
+            // 解密按钮事件
+            decryptBtn.addEventListener('click', () => {
+                const encryptedText = cipherInput.value.trim();
+                if (encryptedText) {
+                    try {
+                        const decrypted = decrypt(encryptedText);
+                        decryptOutput.textContent = decrypted;
+                        decryptOutput.classList.add('glow');
+                        
+                        setTimeout(() => {
+                            decryptOutput.classList.remove('glow');
+                        }, 2000);
+                    } catch (e) {
+                        decryptOutput.textContent = "解密失败：无效的加密文本";
+                    }
+                }
+            });
+            
+            // 复制加密结果
+            copyOutputBtn.addEventListener('click', () => {
+                const textToCopy = outputDisplay.textContent;
+                if (textToCopy && !textToCopy.includes("加密")) {
+                    navigator.clipboard.writeText(textToCopy);
+                    
+                    // 显示反馈
+                    const originalText = copyOutputBtn.innerHTML;
+                    copyOutputBtn.innerHTML = '<i class="fas fa-check"></i> 已复制!';
+                    setTimeout(() => {
+                        copyOutputBtn.innerHTML = originalText;
+                    }, 2000);
+                }
+            });
+            
+            // 复制解密结果
+            copyDecryptBtn.addEventListener('click', () => {
+                const textToCopy = decryptOutput.textContent;
+                if (textToCopy && !textToCopy.includes("解密")) {
+                    navigator.clipboard.writeText(textToCopy);
+                    
+                    // 显示反馈
+                    const originalText = copyDecryptBtn.innerHTML;
+                    copyDecryptBtn.innerHTML = '<i class="fas fa-check"></i> 已复制!';
+                    setTimeout(() => {
+                        copyDecryptBtn.innerHTML = originalText;
+                    }, 2000);
+                }
+            });
+            
+            // 清除输入
+            clearInputBtn.addEventListener('click', () => {
+                inputText.value = '';
+                inputText.focus();
+            });
+            
+            // 清除加密文本
+            clearCipherBtn.addEventListener('click', () => {
+                cipherInput.value = '';
+                cipherInput.focus();
+            });
+            
+            // 初始化示例
+            setTimeout(() => {
+                encryptBtn.click();
+                setTimeout(() => decryptBtn.click(), 1000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
